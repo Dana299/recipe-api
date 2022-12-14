@@ -52,6 +52,7 @@ class Recipe(models.Model):
     time_preparing = models.PositiveIntegerField(null=False)
     is_spicy = models.BooleanField(default=False)
     is_vegetarian = models.BooleanField(default=False)
+    servings_number = models.PositiveIntegerField(null=False)
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.PUBLISHED
     )
