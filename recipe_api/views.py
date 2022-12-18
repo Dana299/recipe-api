@@ -1,41 +1,77 @@
+import json
+
 from django.shortcuts import get_object_or_404, render
-from rest_framework import viewsets
+from rest_framework import mixins, status, viewsets
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
 from .models import Comment, Ingredient, Recipe, RecipeIngredient, RecipeStep
 from .pagination import CustomPagination
+from .permissions import IsOwnerOrReadOnly
 from .serializers import (CommentSerializer, RecipeDetailedSerializer,
                           RecipeListSerializer)
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeListViewSet(mixins.ListModelMixin,
+                        viewsets.GenericViewSet):
     """
-    ViewSet for listing or retrieving recipes
+    ViewSet for listing recipes
     """
     queryset = Recipe.objects.select_related('author').filter(status=Recipe.Status.PUBLISHED)
     serializer_class = RecipeListSerializer
     pagination_class = CustomPagination
+
 
     def list(self, request):
         queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
 
         if page is not None:
-            serializer = RecipeListSerializer(page, many=True)
+            serializer = self.get_serializer(page, many=True)
             result = self.get_paginated_response(serializer.data)
             return Response(result.data)
         else:
-            serializer = RecipeListSerializer(queryset, many=True)
+            serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
 
+
+class RecipeDetailedViewSet(mixins.CreateModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.DestroyModelMixin,
+                            mixins.UpdateModelMixin,
+                            viewsets.GenericViewSet):
+    """
+    ViewSet for retrieving detailed recipe info,
+    updating existing recipes and creating new recipe instance
+    """
+    queryset = Recipe.objects.filter(status=Recipe.Status.PUBLISHED)
+    serializer_class = RecipeDetailedSerializer
+    parser_classes = (MultiPartParser, FormParser, )
+    permission_classes = (IsOwnerOrReadOnly, )
+
     def retrieve(self, request, pk=None):
-        queryset = Recipe.objects.filter(status=Recipe.Status.PUBLISHED)
-        instance = get_object_or_404(queryset, pk=pk)
+        instance = get_object_or_404(self.get_queryset(), pk=pk)
         serializer = RecipeDetailedSerializer(instance)
         return Response(serializer.data)
 
+    def create(self, request, format=None):
+        image = request.FILES.get("main_picture")
+        data = json.loads(request.data['data'])
+        serializer = self.get_serializer(data=data)
+        # print(request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-class CommentsViewSet(viewsets.ModelViewSet):
+    def destroy(self, request, pk=None):
+        instance = get_object_or_404(Recipe.objects.all(), pk=pk)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CommentsViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
     """
     ViewSet for listing or creating comments on certain recipe
     """
@@ -55,6 +91,5 @@ class CommentsViewSet(viewsets.ModelViewSet):
             serializer = CommentSerializer(queryset, many=True)
             return Response(serializer.data)
 
-    def create(self):
-        pass
-
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
