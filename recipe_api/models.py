@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 from decimal import Decimal
 from uuid import uuid1
 
@@ -17,6 +18,16 @@ def get_image_path(instance, filename):
     if '.' in filename:
         result = os.path.join(result, filename.split('.')[-1])
     return result
+
+
+def get_default_expiration_date():
+    return datetime.now() + timedelta(days=1)
+
+
+class Image(models.Model):
+    image = models.ImageField(upload_to='images/temporary/%Y/%m/%d')
+    is_temporary = models.BooleanField(default=False)
+    expiration_date = models.DateTimeField(default=get_default_expiration_date)
 
 
 class Ingredient(models.Model):
@@ -58,7 +69,11 @@ class Recipe(models.Model):
     )
     category = models.CharField(max_length=30, choices=Category.choices)
     time_created = models.DateTimeField(default=timezone.now)
-    main_picture = models.ImageField(upload_to=get_image_path)
+    main_picture = models.ForeignKey(
+        Image,
+        on_delete=models.SET_NULL,
+        null=True
+    )
 
     def __str__(self):
         return f'{self.recipe_name} by {self.author.user_name}'
@@ -72,9 +87,9 @@ class RecipeStep(models.Model):
         on_delete=models.CASCADE,
         related_name="steps",
     )
-    image_url = models.ImageField(
-        upload_to=get_image_path,
-        blank=True,
+    image = models.ForeignKey(
+        Image,
+        on_delete=models.SET_NULL,
         null=True
     )
 

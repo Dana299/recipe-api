@@ -5,11 +5,12 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
-from .models import Comment, Ingredient, Recipe, RecipeIngredient, RecipeStep
+from .models import (Comment, Image, Ingredient, Recipe, RecipeIngredient,
+                     RecipeStep)
 from .pagination import CustomPagination
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (CommentSerializer, RecipeDetailedSerializer,
-                          RecipeListSerializer)
+from .serializers import (CommentSerializer, ImageSerializer,
+                          RecipeDetailedSerializer, RecipeListSerializer)
 
 
 class RecipeListViewSet(mixins.ListModelMixin,
@@ -20,7 +21,6 @@ class RecipeListViewSet(mixins.ListModelMixin,
     queryset = Recipe.objects.select_related('author').filter(status=Recipe.Status.PUBLISHED)
     serializer_class = RecipeListSerializer
     pagination_class = CustomPagination
-
 
     def list(self, request):
         queryset = self.get_queryset()
@@ -55,9 +55,7 @@ class RecipeDetailedViewSet(mixins.CreateModelMixin,
         return Response(serializer.data)
 
     def create(self, request, format=None):
-        image = request.FILES.get("main_picture")
-        data = json.loads(request.data['data'])
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(request.data)
         # print(request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -93,3 +91,17 @@ class CommentsViewSet(mixins.ListModelMixin,
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+
+class ImageViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """
+    Viewset for uploading pictures
+    """
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        file = request.data.get('file')
+        image = models.Image.objects.create(image=file)
+        return HttpResponse(json.dumps({'message': "Uploaded"}), status=200)

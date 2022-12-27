@@ -27,7 +27,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 
 
 class RecipeStepAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'image_url',)
+    list_display = ('recipe', 'image',)
 
 
 admin.site.register(Comment, CommentAdmin)

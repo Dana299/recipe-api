@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from .models import Comment, Ingredient, Recipe, RecipeIngredient, RecipeStep
+from .models import (Comment, Image, Ingredient, Recipe, RecipeIngredient,
+                     RecipeStep)
 
 
 class SlugRelatedGetOrCreateField(serializers.SlugRelatedField):
@@ -118,6 +119,16 @@ class CommentSerializer(serializers.ModelSerializer):
     Serializer for comments
     """
     user = serializers.StringRelatedField()
+
     class Meta:
         model = Comment
         fields = ('comment_text', 'user', 'time_created')
+
+
+class ImageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for images
+    """
+    class Meta:
+        model = Image
+        fields = ('image',)
