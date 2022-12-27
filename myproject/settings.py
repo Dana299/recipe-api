@@ -88,12 +88,12 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        'NAME': 'mydb',
-        'USER': 'root',
-        'PASSWORD': 'rootpassword',
-        'HOST':'localhost',
-        'PORT':'3306',
+        "ENGINE": "django.db.backends.postgresql",
+        'NAME': 'recipeproject',
+        'USER': 'projectuser',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
