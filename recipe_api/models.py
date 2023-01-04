@@ -85,7 +85,7 @@ class Recipe(models.Model):
 
 class RecipeStep(models.Model):
 
-    step_text = models.TextField(max_length=500, blank=True)
+    step_text = models.TextField(max_length=500)
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
