@@ -13,6 +13,11 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -43,6 +48,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "rest_framework_simplejwt.token_blacklist",
+    "storages",
 ]
 
 INTERNAL_IPS = [
@@ -91,9 +97,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         'NAME': 'recipeproject',
         'USER': 'projectuser',
-        'PASSWORD': 'password',
+        'PASSWORD': 'rootpassword',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5432',
     }
 }
 
@@ -170,3 +176,12 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# ----Yandex s3----
+DEFAULT_FILE_STORAGE = 'storage_backends.ClientDocsStorage'
+AWS_STORAGE_BUCKET_NAME = 'recipebucket'
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
+AWS_REGION = 'ru-central1'
+AWS_LOCATION = 'temporary/'

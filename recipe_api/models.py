@@ -6,6 +6,7 @@ from uuid import uuid1
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
+from myproject.storage_backends import ClientDocsStorage
 
 from account.models import CustomUser
 
@@ -21,13 +22,16 @@ def get_image_path(instance, filename):
 
 
 def get_default_expiration_date():
-    return datetime.now() + timedelta(days=1)
+    return datetime.now(tz=timezone.utc) + timedelta(days=1)
 
 
 class Image(models.Model):
-    image = models.ImageField(upload_to='images/temporary/%Y/%m/%d')
-    is_temporary = models.BooleanField(default=False)
+    image = models.ImageField(storage=ClientDocsStorage())
+    is_temporary = models.BooleanField(default=True)
     expiration_date = models.DateTimeField(default=get_default_expiration_date)
+
+    def __str__(self):
+        return self.image.url
 
 
 class Ingredient(models.Model):
