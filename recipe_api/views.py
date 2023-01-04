@@ -2,15 +2,16 @@ import json
 
 from django.shortcuts import get_object_or_404, render
 from rest_framework import mixins, status, viewsets
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 from .models import (Comment, Image, Ingredient, Recipe, RecipeIngredient,
                      RecipeStep)
 from .pagination import CustomPagination
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (CommentSerializer, ImageSerializer,
-                          RecipeDetailedSerializer, RecipeListSerializer)
+from .serializers import (CommentSerializer, ImagePostSerializer,
+                          ImageSerializer, RecipeDetailedSerializer,
+                          RecipeListSerializer)
 
 
 class RecipeListViewSet(mixins.ListModelMixin,
@@ -46,17 +47,19 @@ class RecipeDetailedViewSet(mixins.CreateModelMixin,
     """
     queryset = Recipe.objects.filter(status=Recipe.Status.PUBLISHED)
     serializer_class = RecipeDetailedSerializer
-    parser_classes = (MultiPartParser, FormParser, )
+    parser_classes = (JSONParser, )
     permission_classes = (IsOwnerOrReadOnly, )
 
     def retrieve(self, request, pk=None):
         instance = get_object_or_404(self.get_queryset(), pk=pk)
-        serializer = RecipeDetailedSerializer(instance)
+        serializer = RecipeDetailedSerializer(instance, context={"request": request})
         return Response(serializer.data)
 
-    def create(self, request, format=None):
-        serializer = self.get_serializer(request.data)
-        # print(request.data)
+    def create(self, request):
+        serializer = self.get_serializer(
+            data=request.data,
+            context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -98,10 +101,8 @@ class ImageViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     Viewset for uploading pictures
     """
     queryset = Image.objects.all()
-    serializer_class = ImageSerializer
+    serializer_class = ImagePostSerializer
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request, *args, **kwargs):
-        file = request.data.get('file')
-        image = models.Image.objects.create(image=file)
-        return HttpResponse(json.dumps({'message': "Uploaded"}), status=200)
+        return self.create(request, *args, **kwargs)
