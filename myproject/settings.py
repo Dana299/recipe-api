@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "rest_framework_simplejwt.token_blacklist",
     "storages",
+    "drf_yasg",
 ]
 
 INTERNAL_IPS = [
