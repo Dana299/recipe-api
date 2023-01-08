@@ -15,11 +15,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     http_method_names = ['get', 'post', 'head', 'put', 'delete']
 
-    def get_serializer(self, *args, **kwargs):
+    def get_serializer_class(self, *args, **kwargs):
         if self.action == 'list':
-            return RecipeListSerializer()
+            return RecipeListSerializer
         else:
-            return RecipeDetailedSerializer()
+            return RecipeDetailedSerializer
 
 
 class CommentsViewSet(mixins.ListModelMixin,
