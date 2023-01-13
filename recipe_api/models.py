@@ -62,11 +62,20 @@ class Recipe(models.Model):
 
     recipe_name = models.CharField(max_length=100)
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    time_cooking = models.PositiveIntegerField(null=False)
-    time_preparing = models.PositiveIntegerField(null=False)
+    time_cooking = models.PositiveIntegerField(
+        null=False,
+        validators=[MinValueValidator(1),]
+    )
+    time_preparing = models.PositiveIntegerField(
+        null=False,
+        validators=[MinValueValidator(1),]
+    )
     is_spicy = models.BooleanField(default=False)
     is_vegetarian = models.BooleanField(default=False)
-    servings_number = models.PositiveIntegerField(null=False)
+    servings_number = models.PositiveIntegerField(
+        null=False,
+        validators=[MinValueValidator(1),]
+    )
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.PUBLISHED
     )
