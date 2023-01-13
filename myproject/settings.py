@@ -31,7 +31,7 @@ SECRET_KEY = "django-insecure-snk(ls32)kq@jqgtl-bhw%%azo_7_8_ylgvb*iss%$3mav2v==
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -186,3 +186,4 @@ AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
 AWS_REGION = 'ru-central1'
 AWS_LOCATION = 'temporary/'
+AWS_QUERYSTRING_AUTH = False # remove query parameter authentication from generated URLs

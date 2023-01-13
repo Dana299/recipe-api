@@ -1,24 +1,19 @@
-import os
 from datetime import datetime, timedelta
 from decimal import Decimal
-from uuid import uuid1
+from uuid import uuid4
 
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
-from myproject.storage_backends import ClientDocsStorage
 
 from account.models import CustomUser
+from myproject.storage_backends import ClientDocsStorage
 
 
-def get_image_path(instance, filename):
-    """"
-    Custom upload_to function to make filepaths for images
-    """
-    result = os.path.join('images', str(instance.pk), uuid1().hex)
-    if '.' in filename:
-        result = os.path.join(result, filename.split('.')[-1])
-    return result
+def get_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid4(), ext)
+    return filename
 
 
 def get_default_expiration_date():
@@ -26,7 +21,10 @@ def get_default_expiration_date():
 
 
 class Image(models.Model):
-    image = models.ImageField(storage=ClientDocsStorage())
+    image = models.ImageField(
+        storage=ClientDocsStorage(),
+        upload_to=get_file_path,
+        )
     is_temporary = models.BooleanField(default=True)
     expiration_date = models.DateTimeField(default=get_default_expiration_date)
 
@@ -94,7 +92,8 @@ class RecipeStep(models.Model):
     image = models.ForeignKey(
         Image,
         on_delete=models.SET_NULL,
-        null=True
+        blank=True,
+        null=True,
     )
 
     def __str__(self):
