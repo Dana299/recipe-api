@@ -24,6 +24,7 @@ class Image(models.Model):
     image = models.ImageField(
         storage=ClientDocsStorage(),
         upload_to=get_file_path,
+        null=True,
         )
     is_temporary = models.BooleanField(default=True)
     expiration_date = models.DateTimeField(default=get_default_expiration_date)

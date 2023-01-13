@@ -104,7 +104,7 @@ class StepSerializer(serializers.ModelSerializer):
     """
     Serializer for recipe steps
     """
-    image = ImageSerializer()
+    image = ImageSerializer(allow_null=True)
 
     class Meta:
         model = RecipeStep
