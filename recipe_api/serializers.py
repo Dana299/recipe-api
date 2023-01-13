@@ -94,9 +94,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ('ingredient', 'unit', 'amount')
 
     def create(self, validated_data):
-        ingredient, created = Ingredient.objects.get_or_create(
-                **validated_data
-            )
+        ingredient, created = Ingredient.objects.get_or_create(**validated_data)
         return ingredient
 
 
@@ -143,35 +141,82 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
         steps_list = validated_data.pop('steps', [])
         # create recipe instance
         recipe_obj = Recipe.objects.create(**validated_data)
-        # create ingredients and connections RecipeIngredients
-        for ingredient_dict in ingredients_list:
-            ingredient_name = ingredient_dict['ingredient']
-            ingredient, created = Ingredient.objects.get_or_create(
-                ingredient_name=ingredient_name
-            )
-            recipe_ing_obj = RecipeIngredient.objects.create(
+
+        # create ingedients and connections
+        recipe_ingredients = [
+            RecipeIngredient(
                 recipe=recipe_obj,
-                ingredient=ingredient,
+                ingredient=Ingredient.objects.get_or_create(
+                    ingredient_name=ingredient_dict['ingredient']
+                )[0],
                 unit=ingredient_dict["unit"],
                 amount=ingredient_dict["amount"],
-            )
+            ) for ingredient_dict in ingredients_list
+        ]
 
-            recipe_obj.ingredients.add(recipe_ing_obj)
+        RecipeIngredient.objects.bulk_create(recipe_ingredients)
+        recipe_obj.ingredients.set(recipe_ingredients)
 
         # create steps
-        for step_dict in steps_list:
-            print(step_dict)
-            step_text = step_dict['step_text']
-            image_instance = step_dict['image']
-            step = RecipeStep.objects.create(
-                step_text=step_text,
+        steps_in_recipe = [
+            RecipeStep(
+                step_text=step_dict['step_text'],
                 recipe=recipe_obj,
-                image=image_instance
-            )
+                image=step_dict['image']
+            ) for step_dict in steps_list
+        ]
 
-            recipe_obj.steps.add(step)
+        RecipeStep.objects.bulk_create(steps_in_recipe)
+        recipe_obj.steps.set(steps_in_recipe)
 
         return recipe_obj
+
+    def update(self, instance, validated_data):
+        ingredients_list = validated_data.pop('ingredients')
+        steps_list = validated_data.pop('steps')
+
+        instance.recipe_name = validated_data.get('recipe_name')
+        instance.time_cooking = validated_data.get('time_cooking')
+        instance.time_preparing = validated_data.get('time_preparing')
+        instance.is_spicy = validated_data.get('is_spicy')
+        instance.is_vegetarian = validated_data.get('is_vegetarian')
+        instance.servings_number = validated_data.get('servings_number')
+        instance.status = validated_data.get('status')
+        instance.category = validated_data.get('category')
+        instance.main_picture = validated_data.get('main_picture')
+
+        # delete existing steps and ingredient connections from DB
+        RecipeIngredient.objects.filter(recipe=instance).delete()
+        RecipeStep.objects.filter(recipe=instance).delete()
+
+        # create ingedients and connections
+        recipe_ingredients = [
+            RecipeIngredient(
+                recipe=instance,
+                ingredient=Ingredient.objects.get_or_create(
+                    ingredient_name=ingredient_dict['ingredient']
+                )[0],
+                unit=ingredient_dict["unit"],
+                amount=ingredient_dict["amount"],
+            ) for ingredient_dict in ingredients_list
+        ]
+
+        RecipeIngredient.objects.bulk_create(recipe_ingredients)
+        instance.ingredients.set(recipe_ingredients)
+
+        # create steps
+        steps_in_recipe = [
+            RecipeStep(
+                step_text=step_dict['step_text'],
+                recipe=instance,
+                image=step_dict['image']
+            ) for step_dict in steps_list
+        ]
+
+        RecipeStep.objects.bulk_create(steps_in_recipe)
+        instance.steps.set(steps_in_recipe)
+
+        return instance
 
 
 class CommentSerializer(serializers.ModelSerializer):
