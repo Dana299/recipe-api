@@ -1,5 +1,11 @@
+import io
 import re
+import sys
 
+from django.conf import settings
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils.translation import gettext_lazy as _
+from PIL import Image as PillowImage
 from rest_framework import serializers
 
 from .models import (Comment, Image, Ingredient, Recipe, RecipeIngredient,
@@ -29,6 +35,35 @@ class ImagePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = ('image',)
+
+    def validate_image(self, image):
+        # converting into PNG format
+        img = PillowImage.open(image)
+        img_name = image.name.split('.')[0]
+
+        if img.format.lower() not in settings.ALLOWED_UPLOAD_IMAGES:
+            raise serializers.ValidationError(
+                _("Unsupported file format. Supported formats are %s."
+                  % ", ".join(settings.ALLOWED_UPLOAD_IMAGES))
+            )
+
+        if img.format.lower() != 'jpeg':
+            img_io = io.BytesIO()
+            img = img.convert('RGB')
+            img.save(img_io, format='jpeg', quality=40)
+
+            converted_img = InMemoryUploadedFile(
+                file=img_io,
+                field_name='ImageField',
+                name=img_name + '.jpeg',
+                size=sys.getsizeof(img_io),
+                content_type='png',
+                charset=None
+            )
+
+            return converted_img
+
+        return image
 
 
 class ImageSerializer(serializers.ModelSerializer):
