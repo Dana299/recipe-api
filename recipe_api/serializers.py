@@ -77,7 +77,7 @@ class ImageSerializer(serializers.ModelSerializer):
         fields = ('image',)
 
     def to_internal_value(self, data):
-        filename = re.search(r'[^\/]*\.jpg', data['image']).group(0)
+        filename = re.search(r'[^\/]*\.jpeg', data['image']).group(0)
         obj = Image.objects.get(image=filename)
         return obj
 
