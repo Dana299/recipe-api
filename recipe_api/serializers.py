@@ -187,6 +187,11 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
         RecipeStep.objects.bulk_create(steps_in_recipe)
         recipe_obj.steps.set(steps_in_recipe)
 
+        # change image flag 'is_temporary' to False
+        image = recipe_obj.main_picture
+        image.is_temporary = False
+        image.save()
+
         return recipe_obj
 
     def update(self, instance, validated_data):
