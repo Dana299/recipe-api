@@ -251,3 +251,10 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('comment_text', 'user', 'time_created')
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        validated_data['recipe'] = Recipe.objects.get(
+            pk=self.context['recipe_pk']
+        )
+        return super().create(validated_data)
