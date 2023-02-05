@@ -186,7 +186,7 @@ AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
 AWS_REGION = 'ru-central1'
 AWS_LOCATION = 'temporary/'
-AWS_QUERYSTRING_AUTH = False # remove query parameter authentication from generated URLs
+AWS_QUERYSTRING_AUTH = False  # remove query parameter authentication from generated URLs
 
 ALLOWED_UPLOAD_IMAGES = ('png', 'jpeg', 'jpg')
 
