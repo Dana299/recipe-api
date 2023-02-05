@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from .models import Comment, Image, Recipe
 from .pagination import CustomPagination
+from .permissions import IsOwnerOrReadOnly
 from .serializers import (CommentSerializer, ImagePostSerializer,
                           RecipeDetailedSerializer, RecipeListSerializer)
 
@@ -26,6 +27,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.select_related('author').filter(status=Recipe.Status.PUBLISHED)
     pagination_class = CustomPagination
     http_method_names = ['get', 'post', 'head', 'put', 'delete']
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, )
 
     def get_serializer_class(self, *args, **kwargs):
         if self.action == 'list':
