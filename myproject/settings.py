@@ -189,3 +189,14 @@ AWS_LOCATION = 'temporary/'
 AWS_QUERYSTRING_AUTH = False # remove query parameter authentication from generated URLs
 
 ALLOWED_UPLOAD_IMAGES = ('png', 'jpeg', 'jpg')
+
+# Swagger
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+}
