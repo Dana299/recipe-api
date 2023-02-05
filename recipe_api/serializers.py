@@ -46,31 +46,30 @@ class ImagePostSerializer(serializers.ModelSerializer):
         fields = ('image',)
 
     def validate_image(self, image):
-        # converting into PNG format
+        # converting into JPEG format
         img = PillowImage.open(image)
         img_name = image.name.split('.')[0]
 
-        if img.format.lower() not in settings.ALLOWED_UPLOAD_IMAGES:
+        if img.format and img.format.lower() not in settings.ALLOWED_UPLOAD_IMAGES:
             raise serializers.ValidationError(
                 _("Unsupported file format. Supported formats are %s."
                   % ", ".join(settings.ALLOWED_UPLOAD_IMAGES))
             )
 
-        if img.format.lower() != 'jpeg':
-            img_io = io.BytesIO()
-            img = img.convert('RGB')
-            img.save(img_io, format='jpeg', quality=40)
+        img_io = io.BytesIO()
+        img = img.convert('RGB')
+        img.save(img_io, format='jpeg', quality=100)
 
-            converted_img = InMemoryUploadedFile(
-                file=img_io,
-                field_name='ImageField',
-                name=img_name + '.jpeg',
-                size=sys.getsizeof(img_io),
-                content_type='png',
-                charset=None
-            )
+        converted_img = InMemoryUploadedFile(
+            file=img_io,
+            field_name='ImageField',
+            name=img_name + '.jpeg',
+            size=sys.getsizeof(img_io),
+            content_type='jpeg',
+            charset=None
+        )
 
-            return converted_img
+        return converted_img
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
