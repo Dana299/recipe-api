@@ -24,8 +24,9 @@ class Image(models.Model):
     image = models.ImageField(
         storage=ClientDocsStorage(),
         upload_to=get_file_path,
+        blank=True,
         null=True,
-        )
+    )
     is_temporary = models.BooleanField(default=True)
     expiration_date = models.DateTimeField(default=get_default_expiration_date)
 
@@ -80,7 +81,7 @@ class Recipe(models.Model):
         max_length=10, choices=Status.choices, default=Status.PUBLISHED
     )
     category = models.CharField(max_length=30, choices=Category.choices)
-    time_created = models.DateTimeField(default=timezone.now)
+    time_created = models.DateTimeField(auto_now_add=True)
     main_picture = models.ForeignKey(
         Image,
         on_delete=models.SET_NULL,
@@ -115,7 +116,7 @@ class Comment(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     # Если пользователь удален, его комментарии оставляем
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
-    time_created = models.DateTimeField(default=timezone.now)
+    time_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.id)

@@ -12,18 +12,27 @@ from .models import (Comment, Image, Ingredient, Recipe, RecipeIngredient,
                      RecipeStep)
 
 
-class SlugRelatedGetOrCreateField(serializers.SlugRelatedField):
+class ImageURLField(serializers.Field):
     """
-    Custom SlugRelatedField to create an object
-    if it doesn't exist in the database
+    Field that contains image URL from storage
+    and that is converted into Image model object
     """
     def to_internal_value(self, data):
-        queryset = self.get_queryset()
-        try:
-            obj, created = queryset.get_or_create(**{self.slug_field: data})
-            return obj
-        except (TypeError, ValueError):
-            self.fail("invalid")
+        filename = re.search(r'[^\/]*\.jpeg', data)
+        if filename:
+            try:
+                obj = Image.objects.get(image=filename.group(0))
+                return obj
+            except Image.DoesNotExist:
+                raise serializers.ValidationError("Such file does not exist")
+        else:
+            raise serializers.ValidationError("Invalid file URL")
+
+    def to_representation(self, value):
+        """
+        Returns image url
+        """
+        return str(value)
 
 
 class ImagePostSerializer(serializers.ModelSerializer):
@@ -63,29 +72,12 @@ class ImagePostSerializer(serializers.ModelSerializer):
 
             return converted_img
 
-        return image
-
-
-class ImageSerializer(serializers.ModelSerializer):
-    """
-    Serializer for images in recipes
-    """
-    image = serializers.ImageField(use_url=True)
-
-    class Meta:
-        model = Image
-        fields = ('image',)
-
-    def to_internal_value(self, data):
-        filename = re.search(r'[^\/]*\.jpeg', data['image']).group(0)
-        obj = Image.objects.get(image=filename)
-        return obj
-
 
 class RecipeListSerializer(serializers.ModelSerializer):
     """
     Serializer for a list of recipes on home page
     """
+    main_picture = ImageURLField()
 
     class Meta:
         model = Recipe
@@ -104,42 +96,32 @@ class StepSerializer(serializers.ModelSerializer):
     """
     Serializer for recipe steps
     """
-    image = ImageSerializer(allow_null=True)
+    image = ImageURLField(required=False)
 
     class Meta:
         model = RecipeStep
         fields = ('step_text', 'image',)
-
-    def create(self, validated_data):
-        step = RecipeStep.objects.create(**validated_data)
-        return step
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     """
     Serializer for ingredients in recipes
     """
-    ingredient = SlugRelatedGetOrCreateField(
-        queryset=Ingredient.objects.all(),
-        slug_field='ingredient_name'
-    )
+    ingredient = serializers.CharField()
 
     class Meta:
         model = RecipeIngredient
         fields = ('ingredient', 'unit', 'amount')
-
-    def create(self, validated_data):
-        ingredient, created = Ingredient.objects.get_or_create(**validated_data)
-        return ingredient
 
 
 class RecipeDetailedSerializer(serializers.ModelSerializer):
     """
     Serializer for a certain recipe - more fields included
     """
-    main_picture = ImageSerializer()
+    main_picture = ImageURLField(required=True)
     ingredients = RecipeIngredientSerializer(many=True)
     steps = StepSerializer(many=True)
+    author = serializers.StringRelatedField()
 
     class Meta:
         model = Recipe
@@ -171,6 +153,8 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        # get author from request
+        validated_data['author'] = self.context['request'].user
         # pop ingredients and steps
         ingredients_list = validated_data.pop('ingredients', [])
         steps_list = validated_data.pop('steps', [])
@@ -197,7 +181,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
             RecipeStep(
                 step_text=step_dict['step_text'],
                 recipe=recipe_obj,
-                image=step_dict['image']
+                image=step_dict.get('image', None)
             ) for step_dict in steps_list
         ]
 
