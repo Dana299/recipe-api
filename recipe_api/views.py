@@ -12,7 +12,7 @@ from .serializers import (CommentSerializer, ImagePostSerializer,
                           RecipeDetailedSerializer, RecipeListSerializer)
 
 comment_text_param = openapi.Parameter(
-    'comment_text',
+    'text',
     openapi.IN_BODY,
     type=openapi.TYPE_STRING
 )
@@ -60,9 +60,9 @@ class CommentsViewSet(mixins.ListModelMixin,
         request_body=openapi.Schema(
             title='Comment',
             type=openapi.TYPE_OBJECT,
-            required=['comment_text'],
+            required=['text'],
             properties={
-                'comment_text': openapi.Schema(
+                'text': openapi.Schema(
                     type=openapi.TYPE_STRING,
                     min_length=1,
                     max_length=1000,

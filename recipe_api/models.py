@@ -35,10 +35,10 @@ class Image(models.Model):
 
 
 class Ingredient(models.Model):
-    ingredient_name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.ingredient_name
+        return self.name
 
 
 class Recipe(models.Model):
@@ -61,7 +61,7 @@ class Recipe(models.Model):
         PASTRY = "Pastries"
         BREAD = "Breads"
 
-    recipe_name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     time_cooking = models.PositiveIntegerField(
         null=False,
@@ -89,12 +89,12 @@ class Recipe(models.Model):
     )
 
     def __str__(self):
-        return f'{self.recipe_name} by {self.author.user_name}'
+        return f'{self.name} by {self.author.user_name}'
 
 
 class RecipeStep(models.Model):
 
-    step_text = models.TextField(max_length=500)
+    text = models.TextField(max_length=500)
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -112,7 +112,7 @@ class RecipeStep(models.Model):
 
 
 class Comment(models.Model):
-    comment_text = models.TextField(max_length=1000)
+    text = models.TextField(max_length=1000)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     # Если пользователь удален, его комментарии оставляем
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
@@ -146,4 +146,4 @@ class RecipeIngredient(models.Model):
     )
 
     def __str__(self):
-        return self.ingredient.ingredient_name
+        return self.ingredient.name

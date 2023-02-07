@@ -81,7 +81,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'recipe_name',
+            'name',
             'author',
             'category',
             'is_spicy',
@@ -99,7 +99,7 @@ class StepSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeStep
-        fields = ('step_text', 'image',)
+        fields = ('text', 'image',)
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -125,7 +125,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'recipe_name',
+            'name',
             'author',
             'category',
             'is_spicy',
@@ -165,7 +165,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
             RecipeIngredient(
                 recipe=recipe_obj,
                 ingredient=Ingredient.objects.get_or_create(
-                    ingredient_name=ingredient_dict['ingredient']
+                    name=ingredient_dict['ingredient']
                 )[0],
                 unit=ingredient_dict["unit"],
                 amount=ingredient_dict["amount"],
@@ -178,7 +178,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
         # create steps
         steps_in_recipe = [
             RecipeStep(
-                step_text=step_dict['step_text'],
+                text=step_dict['text'],
                 recipe=recipe_obj,
                 image=step_dict.get('image', None)
             ) for step_dict in steps_list
@@ -198,7 +198,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
         ingredients_list = validated_data.pop('ingredients')
         steps_list = validated_data.pop('steps')
 
-        instance.recipe_name = validated_data.get('recipe_name')
+        instance.name = validated_data.get('name')
         instance.time_cooking = validated_data.get('time_cooking')
         instance.time_preparing = validated_data.get('time_preparing')
         instance.is_spicy = validated_data.get('is_spicy')
@@ -217,7 +217,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
             RecipeIngredient(
                 recipe=instance,
                 ingredient=Ingredient.objects.get_or_create(
-                    ingredient_name=ingredient_dict['ingredient']
+                    name=ingredient_dict['ingredient']
                 )[0],
                 unit=ingredient_dict["unit"],
                 amount=ingredient_dict["amount"],
@@ -230,7 +230,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
         # create steps
         steps_in_recipe = [
             RecipeStep(
-                step_text=step_dict['step_text'],
+                text=step_dict['text'],
                 recipe=instance,
                 image=step_dict['image']
             ) for step_dict in steps_list
@@ -250,7 +250,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('comment_text', 'user', 'time_created')
+        fields = ('text', 'user', 'time_created')
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user

@@ -10,7 +10,7 @@ class CommentAdmin(admin.ModelAdmin):
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
-        'recipe_name',
+        'name',
         'author',
         'category',
         'get_no_ingredients',
@@ -29,7 +29,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 
 
 class RecipeStepAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'step_text', 'image',)
+    list_display = ('recipe', 'text', 'image',)
 
 
 class ImageAdmin(admin.ModelAdmin):
