@@ -1,9 +1,6 @@
-import io
 import re
-import sys
 
 from django.conf import settings
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.translation import gettext_lazy as _
 from PIL import Image as PillowImage
 from rest_framework import serializers
@@ -46,30 +43,18 @@ class ImagePostSerializer(serializers.ModelSerializer):
         fields = ('image',)
 
     def validate_image(self, image):
-        # converting into JPEG format
-        img = PillowImage.open(image)
-        img_name = image.name.split('.')[0]
+        """ Checks whether the image format is supported. """
 
-        if img.format and img.format.lower() not in settings.ALLOWED_UPLOAD_IMAGES:
-            raise serializers.ValidationError(
-                _("Unsupported file format. Supported formats are %s."
-                  % ", ".join(settings.ALLOWED_UPLOAD_IMAGES))
-            )
+        try:
+            with PillowImage.open(image) as img:
+                if img.format not in settings.ALLOWED_UPLOAD_IMAGES:
+                    raise serializers.ValidationError(
+                        _('Unsupported image format. Only JPEG and PNG are supported.')
+                    )
+        except IOError:
+            raise serializers.ValidationError('Invalid image file.')
 
-        img_io = io.BytesIO()
-        img = img.convert('RGB')
-        img.save(img_io, format='jpeg', quality=100)
-
-        converted_img = InMemoryUploadedFile(
-            file=img_io,
-            field_name='ImageField',
-            name=img_name + '.jpeg',
-            size=sys.getsizeof(img_io),
-            content_type='jpeg',
-            charset=None
-        )
-
-        return converted_img
+        return image
 
 
 class RecipeListSerializer(serializers.ModelSerializer):

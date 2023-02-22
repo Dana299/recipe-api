@@ -87,3 +87,11 @@ class ImageViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Image.objects.all()
     serializer_class = ImagePostSerializer
     parser_classes = (MultiPartParser, FormParser)
+
+    def perform_create(self, serializer):
+        validated_image = serializer.validated_data['image']
+
+        # Convert image to JPEG format
+        converted_image = JpegConverter.convert(validated_image)
+
+        serializer.save(image=converted_image)

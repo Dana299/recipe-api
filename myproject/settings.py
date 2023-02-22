@@ -193,7 +193,7 @@ AWS_REGION = 'ru-central1'
 AWS_LOCATION = 'temporary/'
 AWS_QUERYSTRING_AUTH = False  # remove query parameter authentication from generated URLs
 
-ALLOWED_UPLOAD_IMAGES = ('png', 'jpeg', 'jpg')
+ALLOWED_UPLOAD_IMAGES = ('PNG', 'JPEG',)
 
 # Swagger
 SWAGGER_SETTINGS = {
