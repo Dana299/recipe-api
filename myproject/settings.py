@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-snk(ls32)kq@jqgtl-bhw%%azo_7_8_ylgvb*iss%$3mav2v=="
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -185,11 +185,11 @@ SIMPLE_JWT = {
 
 # ----Yandex s3----
 DEFAULT_FILE_STORAGE = 'storage_backends.ClientDocsStorage'
-AWS_STORAGE_BUCKET_NAME = 'recipebucket'
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
-AWS_REGION = 'ru-central1'
+AWS_REGION = os.getenv('AWS_REGION')
 AWS_LOCATION = 'temporary/'
 AWS_QUERYSTRING_AUTH = False  # remove query parameter authentication from generated URLs
 
