@@ -7,7 +7,6 @@ from django.db import models
 from django.utils import timezone
 
 from account.models import CustomUser
-from myproject.storage_backends import ClientDocsStorage
 
 
 def get_file_path(instance, filename):
@@ -22,7 +21,6 @@ def get_default_expiration_date():
 
 class Image(models.Model):
     image = models.ImageField(
-        storage=ClientDocsStorage(),
         upload_to=get_file_path,
         blank=True,
         null=True,

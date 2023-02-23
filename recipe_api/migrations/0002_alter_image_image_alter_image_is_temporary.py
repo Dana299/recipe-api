@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             model_name="image",
             name="image",
             field=models.ImageField(
-                storage=myproject.storage_backends.ClientDocsStorage(), upload_to=""
+                storage=myproject.storage_backends.ClientImageStorage(), upload_to=""
             ),
         ),
         migrations.AlterField(

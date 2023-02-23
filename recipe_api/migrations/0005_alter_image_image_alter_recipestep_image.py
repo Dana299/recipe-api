@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='image',
             name='image',
-            field=models.ImageField(storage=myproject.storage_backends.ClientDocsStorage(), upload_to=recipe_api.models.get_file_path),
+            field=models.ImageField(storage=myproject.storage_backends.ClientImageStorage(), upload_to=recipe_api.models.get_file_path),
         ),
         migrations.AlterField(
             model_name='recipestep',
