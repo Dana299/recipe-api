@@ -5,6 +5,8 @@ from rest_framework import mixins, viewsets
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
+from utils.image_converter import JpegConverter
+
 from .models import Comment, Image, Recipe
 from .pagination import CustomPagination
 from .permissions import IsOwnerOrReadOnly
