@@ -188,9 +188,10 @@ DEFAULT_FILE_STORAGE = 'myproject.storage_backends.ClientImageStorage'
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_S3_ENDPOINT_URL = 'https://storage.yandexcloud.net'
+AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL')
 AWS_REGION = os.getenv('AWS_REGION')
-AWS_LOCATION = 'temporary/'
+AWS_LOCATION = os.getenv('TEMPORARY_FILES_DIRECTORY_NAME')
+AWS_PERMANENT_DIRECTORY = os.getenv('PERMANENT_FILES_DIRECTORY_NAME')
 AWS_QUERYSTRING_AUTH = False  # remove query parameter authentication from generated URLs
 
 ALLOWED_UPLOAD_IMAGES = ('PNG', 'JPEG',)
