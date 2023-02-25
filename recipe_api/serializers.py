@@ -9,19 +9,33 @@ from .models import (Comment, Image, Ingredient, Recipe, RecipeIngredient,
                      RecipeStep)
 
 
-class ImageURLField(serializers.Field):
+class StorageURLField(serializers.Field):
     """
     Field that contains image URL from storage
     and that is converted into Image model object
     """
-    def to_internal_value(self, data):
-        filename = re.search(r'[^\/]*\.jpeg', data)
-        if filename:
-            try:
-                obj = Image.objects.get(image=filename.group(0))
-                return obj
-            except Image.DoesNotExist:
-                raise serializers.ValidationError("Such file does not exist")
+
+    S3_URL_REGEX = (rf'{settings.AWS_S3_ENDPOINT_URL}/'
+                    f'{settings.AWS_STORAGE_BUCKET_NAME}/'
+                    f'{settings.AWS_LOCATION}.+$')
+
+    def to_internal_value(self, url):
+        """
+        Return the corresponding Image object from the database for the given URL.
+        Raises ValidationError if URL does not match the expected pattern S3_URL_REGEX.
+        Raises ValidationError if corresponding Image object does not exist in DB.
+        """
+
+        if not re.fullmatch(self.S3_URL_REGEX, url):
+            raise serializers.ValidationError("Invalid URL.")
+
+        filename = url.split('/')[-1]
+
+        try:
+            obj = Image.objects.get(image=filename)
+            return obj
+        except Image.DoesNotExist:
+            raise serializers.ValidationError("Such file does not exist")
         else:
             raise serializers.ValidationError("Invalid file URL")
 
@@ -61,7 +75,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
     """
     Serializer for a list of recipes on home page
     """
-    main_picture = ImageURLField()
+    main_picture = StorageURLField()
+    author = serializers.StringRelatedField()
 
     class Meta:
         model = Recipe
@@ -80,7 +95,7 @@ class StepSerializer(serializers.ModelSerializer):
     """
     Serializer for recipe steps
     """
-    image = ImageURLField(required=False)
+    image = StorageURLField(required=False)
 
     class Meta:
         model = RecipeStep
@@ -102,7 +117,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
     """
     Serializer for a certain recipe - more fields included
     """
-    main_picture = ImageURLField(required=True)
+    main_picture = StorageURLField(required=True)
     ingredients = RecipeIngredientSerializer(many=True)
     steps = StepSerializer(many=True)
     author = serializers.StringRelatedField()
