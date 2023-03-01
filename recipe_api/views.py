@@ -49,8 +49,8 @@ class CommentsViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticatedOrReadOnly, )
 
     def get_queryset(self):
-        recipe_pk = self.kwargs['pk']
-        return Comment.objects.filter(recipe=recipe_pk).select_related('user')
+        recipe = get_object_or_404(Recipe, pk=self.kwargs['pk'])
+        return Comment.objects.filter(recipe=recipe).select_related('user')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -74,12 +74,7 @@ class CommentsViewSet(mixins.ListModelMixin,
         responses={201: user_response}
     )
     def create(self, request, *args, **kwargs):
-        get_object_or_404(Recipe, pk=self.kwargs['pk'])
         return super().create(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        get_object_or_404(Recipe, pk=self.kwargs['pk'])
-        return super().list(request, *args, **kwargs)
 
 
 class ImageViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):

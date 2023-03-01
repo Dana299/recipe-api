@@ -1,6 +1,7 @@
 import re
 
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from PIL import Image as PillowImage
 from rest_framework import serializers
@@ -254,7 +255,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
-        validated_data['recipe'] = Recipe.objects.get(
-            pk=self.context['recipe_pk']
+        validated_data['recipe'] = get_object_or_404(
+            Recipe,
+            pk=self.context['recipe_pk'],
         )
         return super().create(validated_data)
