@@ -113,6 +113,14 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
         fields = ('ingredient', 'unit', 'amount')
 
+    def validate_ingredient(self, value):
+        """
+        Check if the ingredient already exists in the database
+        """
+        if not Ingredient.objects.filter(name=value).exists():
+            raise serializers.ValidationError(f"Ingredient '{value}' does not exist.")
+        return value
+
 
 class RecipeDetailedSerializer(serializers.ModelSerializer):
     """
@@ -165,9 +173,9 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
         recipe_ingredients = [
             RecipeIngredient(
                 recipe=recipe_obj,
-                ingredient=Ingredient.objects.get_or_create(
+                ingredient=Ingredient.objects.get(
                     name=ingredient_dict['ingredient']
-                )[0],
+                ),
                 unit=ingredient_dict["unit"],
                 amount=ingredient_dict["amount"],
             ) for ingredient_dict in ingredients_list
@@ -217,9 +225,9 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
         recipe_ingredients = [
             RecipeIngredient(
                 recipe=instance,
-                ingredient=Ingredient.objects.get_or_create(
+                ingredient=Ingredient.objects.get(
                     name=ingredient_dict['ingredient']
-                )[0],
+                ),
                 unit=ingredient_dict["unit"],
                 amount=ingredient_dict["amount"],
             ) for ingredient_dict in ingredients_list
