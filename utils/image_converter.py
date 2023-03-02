@@ -10,6 +10,7 @@ class JpegConverter:
 
     FORMAT = 'JPEG'
     MODE = 'RGB'
+    WIDTH = 600
 
     @classmethod
     def convert(cls, image: TemporaryUploadedFile) -> InMemoryUploadedFile:
@@ -17,6 +18,9 @@ class JpegConverter:
         Converts the given image into JPEG format.
         """
         img = PillowImage.open(image)
+        width, height = img.size
+        new_height = cls.WIDTH * height // width
+        img = img.resize((cls.WIDTH, new_height))
         img_io = BytesIO()
         img = img.convert(cls.MODE)
         img.save(img_io, format=cls.FORMAT, quality=100)
