@@ -1,6 +1,7 @@
 import re
 
 from django.conf import settings
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from PIL import Image as PillowImage
 from rest_framework import serializers
@@ -151,6 +152,7 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Recipe must have at least one step')
         return data
 
+    @transaction.atomic
     def create(self, validated_data):
         # get author from request
         validated_data['author'] = self.context['request'].user
@@ -184,13 +186,19 @@ class RecipeDetailedSerializer(serializers.ModelSerializer):
             ) for step_dict in steps_list
         ]
 
-        RecipeStep.objects.bulk_create(steps_in_recipe)
+        recipe_steps = RecipeStep.objects.bulk_create(steps_in_recipe)
         recipe_obj.steps.set(steps_in_recipe)
 
         # change image flag 'is_temporary' to False
         image = recipe_obj.main_picture
         image.is_temporary = False
         image.save()
+
+        # change image flag 'is_temporary' to False for all step images
+        for step in recipe_steps:
+            image = step.image
+            image.is_temporary = False
+            image.save()
 
         return recipe_obj
 
