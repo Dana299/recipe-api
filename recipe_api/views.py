@@ -26,7 +26,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """
     ViewSet for listing, retrieving, updating and creating recipes
     """
-    queryset = Recipe.objects.select_related('author').filter(status=Recipe.Status.PUBLISHED)
+    queryset = (Recipe.objects
+                .select_related('author')
+                .prefetch_related('ingredients__ingredient', 'steps__image')
+                .filter(status=Recipe.Status.PUBLISHED)
+                )
+
     pagination_class = CustomPagination
     http_method_names = ['get', 'post', 'head', 'put', 'delete']
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, )
