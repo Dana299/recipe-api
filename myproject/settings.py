@@ -41,16 +41,25 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    'django.contrib.sites',
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "recipe_api.apps.RecipeApiConfig",
     "account.apps.AccountConfig",
     "rest_framework",
-    "debug_toolbar",
+    "rest_framework.authtoken",
     "rest_framework_simplejwt.token_blacklist",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "dj_rest_auth",
+    'dj_rest_auth.registration',
+    "debug_toolbar",
     "storages",
     "drf_yasg",
 ]
+
+SITE_ID = 1
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -129,7 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'account.CustomUser'
+AUTH_USER_MODEL = 'user_account.CustomUser'
 
 
 # Internationalization
@@ -161,7 +170,7 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ],
 
     'DEFAULT_PARSER_CLASSES': [
@@ -174,6 +183,9 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
         'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
     ],
+    'JSON_UNDERSCOREIZE': {
+        'no_underscore_before_number': True,
+    },
 }
 
 SIMPLE_JWT = {
@@ -182,6 +194,31 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+REST_AUTH = {
+    'USE_JWT': True,
+    'SESSION_LOGIN': False,
+    'JWT_AUTH_COOKIE': 'access_token',
+    'JWT_AUTH_REFRESH_COOKIE': 'refresh_token',
+    'JWT_AUTH_HTTPONLY': True,
+    'JWT_AUTH_SECURE': False,   # set True to use only HTTPS
+    'JWT_AUTH_RETURN_EXPIRATION': True,
+    'JWT_AUTH_REFRESH_COOKIE_PATH': '/',
+    'REGISTER_SERIALIZER': 'account.serializers.CustomRegisterSerialiazer',
+}
+
+
+# allauth settings
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "user_name"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_VERIFICATION = None
+
+AUTHENTICATION_BACKENDS = [
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 
 # ----Yandex s3----
 DEFAULT_FILE_STORAGE = 'myproject.storage_backends.ClientImageStorage'
