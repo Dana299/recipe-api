@@ -96,9 +96,9 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        'NAME': 'recipeproject',
-        'USER': 'projectuser',
-        'PASSWORD': 'rootpassword',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASS'),
         'HOST': 'localhost',
         'PORT': '5432',
     }
