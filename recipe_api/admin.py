@@ -40,9 +40,15 @@ class ImageAdmin(admin.ModelAdmin):
     get_image_url.short_description = "URL from storage"
 
 
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name',)
+    search_fields = ('name', )
+    ordering = ('name', )
+
+
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Image, ImageAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(RecipeIngredient, RecipeIngredientAdmin)
 admin.site.register(RecipeStep, RecipeStepAdmin)
-admin.site.register(Ingredient)
+admin.site.register(Ingredient, IngredientAdmin)
